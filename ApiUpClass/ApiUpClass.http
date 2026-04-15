@@ -1,0 +1,6 @@
+@ApiUpClass_HostAddress = http://localhost:5108
+
+GET {{ApiUpClass_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

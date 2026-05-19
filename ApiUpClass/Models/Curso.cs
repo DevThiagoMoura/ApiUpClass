@@ -30,5 +30,7 @@ namespace ApiUpClass.Models
         public int CategoriaId { get; set; }
 
         public virtual Categoria? Categoria { get; set; }
+
+        public required ICollection<Modulo> Modulos { get; set; } 
     }
 }

@@ -25,11 +25,21 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<CategoriaService>();
 builder.Services.AddScoped<CursoService>();
+builder.Services.AddScoped<ModuloService>();
+builder.Services.AddScoped<AulaService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<MatriculaService>();
+builder.Services.AddScoped<PagamentoService>();
 
 builder.Services.AddAutoMapper(config =>
 {
     config.AddProfile<CategoriaProfile>();
     config.AddProfile<CursoProfile>();
+    config.AddProfile<ModuloProfile>();
+    config.AddProfile<AulaProfile>();
+    config.AddProfile<UsuarioProfile>();
+    config.AddProfile<MatriculaProfile>();
+    config.AddProfile<PagamentoProfile>();
 });
 
 var app = builder.Build();

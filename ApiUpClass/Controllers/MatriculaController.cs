@@ -1,6 +1,7 @@
-﻿using ApiUpClass.Dtos;
+using ApiUpClass.Dtos;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUpClass.Controllers
@@ -31,6 +32,7 @@ namespace ApiUpClass.Controllers
             catch (Exception e) { return Problem(e.Message); }
         }
 
+        [Authorize(Roles = "aluno")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] MatriculaDto dto)
         {

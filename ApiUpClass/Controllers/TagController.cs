@@ -1,18 +1,17 @@
-using ApiUpClass.Dtos;
+﻿using ApiUpClass.Dtos;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUpClass.Controllers
 {
-    [Route("/pagamentos")]
+    [Route("/tags")]
     [ApiController]
-    public class PagamentoController : ControllerBase
+    public class TagController : ControllerBase
     {
-        private readonly PagamentoService _service;
+        private readonly TagService _service;
 
-        public PagamentoController(PagamentoService service)
+        public TagController(TagService service)
         {
             _service = service;
         }
@@ -32,9 +31,8 @@ namespace ApiUpClass.Controllers
             catch (Exception e) { return Problem(e.Message); }
         }
 
-        [Authorize(Roles = "aluno")]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PagamentoDto dto)
+        public async Task<IActionResult> Create([FromBody] TagDto dto)
         {
             try { return Created("", await _service.Create(dto)); }
             catch (ErrorServiceException e) { return e.ToActionResult(this); }
@@ -42,7 +40,7 @@ namespace ApiUpClass.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PagamentoUpdateDto dto)
+        public async Task<IActionResult> Update(int id, [FromBody] TagDto dto)
         {
             try { return Ok(await _service.Update(id, dto)); }
             catch (ErrorServiceException e) { return e.ToActionResult(this); }

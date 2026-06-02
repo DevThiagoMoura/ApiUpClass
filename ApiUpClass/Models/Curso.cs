@@ -32,5 +32,8 @@ namespace ApiUpClass.Models
         public virtual Categoria? Categoria { get; set; }
 
         public required ICollection<Modulo> Modulos { get; set; } 
+
+        public ICollection<CursoTag>? CursosTags { get; set; }
+        public ICollection<Avaliacao>? Avaliacoes { get; set; }
     }
 }

@@ -30,5 +30,8 @@ namespace ApiUpClass.Models
 
         [JsonIgnore]
         public ICollection<Pagamento>? Pagamentos { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Avaliacao>? Avaliacoes { get; set; }
     }
 }

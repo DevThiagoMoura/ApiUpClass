@@ -1,6 +1,7 @@
 using ApiUpClass.Dtos;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUpClass.Controllers
@@ -50,6 +51,7 @@ namespace ApiUpClass.Controllers
             }
         }
 
+        [Authorize(Roles = "instrutor")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CursoDto novoCurso)
         {

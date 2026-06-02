@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUpClass.Controllers
 {
-    [Route("/pagamentos")]
+    [Route("/avaliacoes")]
     [ApiController]
-    public class PagamentoController : ControllerBase
+    public class AvaliacaoController : ControllerBase
     {
-        private readonly PagamentoService _service;
+        private readonly AvaliacaoService _service;
 
-        public PagamentoController(PagamentoService service)
+        public AvaliacaoController(AvaliacaoService service)
         {
             _service = service;
         }
@@ -34,7 +34,7 @@ namespace ApiUpClass.Controllers
 
         [Authorize(Roles = "aluno")]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PagamentoDto dto)
+        public async Task<IActionResult> Create([FromBody] AvaliacaoDto dto)
         {
             try { return Created("", await _service.Create(dto)); }
             catch (ErrorServiceException e) { return e.ToActionResult(this); }
@@ -42,7 +42,7 @@ namespace ApiUpClass.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PagamentoUpdateDto dto)
+        public async Task<IActionResult> Update(int id, [FromBody] AvaliacaoUpdateDto dto)
         {
             try { return Ok(await _service.Update(id, dto)); }
             catch (ErrorServiceException e) { return e.ToActionResult(this); }

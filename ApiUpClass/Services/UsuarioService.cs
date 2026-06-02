@@ -3,6 +3,7 @@ using ApiUpClass.Dtos;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Models;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiUpClass.Services
@@ -11,6 +12,7 @@ namespace ApiUpClass.Services
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly PasswordHasher<Usuario> _passwordHasher = new();
 
         public UsuarioService(AppDbContext context, IMapper mapper)
         {
@@ -51,6 +53,7 @@ namespace ApiUpClass.Services
             }
 
             var usuario = _mapper.Map<Usuario>(data);
+            usuario.SenhaHash = _passwordHasher.HashPassword(usuario, data.Senha);
 
             await _context.Usuarios.AddAsync(usuario);
             await _context.SaveChangesAsync();

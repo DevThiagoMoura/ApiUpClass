@@ -1,6 +1,7 @@
-﻿using ApiUpClass.Dtos;
+using ApiUpClass.Dtos;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiUpClass.Controllers
@@ -16,6 +17,7 @@ namespace ApiUpClass.Controllers
             _service = service;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> FindAll()
         {

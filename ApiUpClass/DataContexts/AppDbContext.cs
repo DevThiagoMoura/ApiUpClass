@@ -18,5 +18,8 @@ namespace ApiUpClass.DataContexts
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Matricula> Matriculas { get; set; }
         public DbSet<Pagamento> Pagamentos { get; set; }
+        public DbSet<Avaliacao> Avaliacoes { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<CursoTag> CursosTags { get; set; }
     }
 }

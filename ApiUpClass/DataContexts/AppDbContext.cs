@@ -21,5 +21,22 @@ namespace ApiUpClass.DataContexts
         public DbSet<Avaliacao> Avaliacoes { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<CursoTag> CursosTags { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CursoTag>()
+                .ToTable("cursos_tags")
+                .HasKey(x => new { x.CursoId, x.TagId });
+
+            modelBuilder.Entity<CursoTag>()
+                .HasOne(x => x.Curso)
+                .WithMany(x => x.CursosTags)
+                .HasForeignKey(x => x.CursoId);
+
+            modelBuilder.Entity<CursoTag>()
+                .HasOne(x => x.Tag)
+                .WithMany(x => x.CursosTags)
+                .HasForeignKey(x => x.TagId);
+        }
     }
 }

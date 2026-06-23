@@ -1,8 +1,10 @@
-﻿using ApiUpClass.DataContexts;
+using ApiUpClass.DataContexts;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Models;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiUpClass.Services
@@ -18,15 +20,21 @@ namespace ApiUpClass.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Avaliacao>> FindAll()
+        public async Task<ICollection<AvaliacaoResponseDto>> FindAll()
         {
             return await _context.Avaliacoes
-                .Include(x => x.Usuario)
-                .Include(x => x.Curso)
+                .ProjectTo<AvaliacaoResponseDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
-        public async Task<Avaliacao> FindById(int id)
+        public async Task<AvaliacaoResponseDto> FindById(int id)
+        {
+            var avaliacao = await FindEntityById(id);
+
+            return _mapper.Map<AvaliacaoResponseDto>(avaliacao);
+        }
+
+        private async Task<Avaliacao> FindEntityById(int id)
         {
             var avaliacao = await _context.Avaliacoes
                 .Include(x => x.Usuario)
@@ -36,15 +44,15 @@ namespace ApiUpClass.Services
             if (avaliacao is null)
             {
                 throw new ErrorServiceException(
-                    "Avaliação não encontrada",
-                    c => c.NotFound(new { message = $"Avaliação #{id} não encontrada" })
+                    "Avaliacao nao encontrada",
+                    c => c.NotFound(new { message = $"Avaliacao #{id} nao encontrada" })
                 );
             }
 
             return avaliacao;
         }
 
-        public async Task<Avaliacao> Create(AvaliacaoDto data)
+        public async Task<AvaliacaoResponseDto> Create(AvaliacaoDto data)
         {
             var usuarioExiste = await _context.Usuarios.AnyAsync(x => x.Id == data.UsuarioId);
             var cursoExiste = await _context.Cursos.AnyAsync(x => x.Id == data.CursoId);
@@ -53,15 +61,26 @@ namespace ApiUpClass.Services
             {
                 throw new ErrorServiceException(
                     "Usuario nao encontrado",
-                    c => c.NotFound(new { message = $"Usuario #{data.UsuarioId} não encontrado" })
+                    c => c.NotFound(new { message = $"Usuario #{data.UsuarioId} nao encontrado" })
                 );
             }
 
             if (!cursoExiste)
             {
                 throw new ErrorServiceException(
-                    "Curso não encontrado",
-                    c => c.NotFound(new { message = $"Curso #{data.CursoId} não encontrado" })
+                    "Curso nao encontrado",
+                    c => c.NotFound(new { message = $"Curso #{data.CursoId} nao encontrado" })
+                );
+            }
+
+            var matriculaAtiva = await _context.Matriculas
+                .AnyAsync(x => x.UsuarioId == data.UsuarioId && x.CursoId == data.CursoId && x.Status == "ativo");
+
+            if (!matriculaAtiva)
+            {
+                throw new ErrorServiceException(
+                    "Matricula nao encontrada",
+                    c => c.Conflict(new { message = "O usuario precisa estar matriculado no curso para avaliar" })
                 );
             }
 
@@ -71,8 +90,8 @@ namespace ApiUpClass.Services
             if (avaliacaoExiste)
             {
                 throw new ErrorServiceException(
-                    "Avaliação já existente",
-                    c => c.Conflict(new { message = "O usuario já avaliou este curso" })
+                    "Avaliacao ja existente",
+                    c => c.Conflict(new { message = "O usuario ja avaliou este curso" })
                 );
             }
 
@@ -81,24 +100,46 @@ namespace ApiUpClass.Services
             await _context.Avaliacoes.AddAsync(avaliacao);
             await _context.SaveChangesAsync();
 
-            return avaliacao;
+            return await FindById(avaliacao.Id);
         }
 
-        public async Task<Avaliacao> Update(int id, AvaliacaoUpdateDto data)
+        public async Task<AvaliacaoResponseDto> Update(int id, AvaliacaoUpdateDto data)
         {
-            var avaliacao = await FindById(id);
+            var avaliacao = await FindEntityById(id);
+
+            var matriculaAtiva = await _context.Matriculas
+                .AnyAsync(x => x.UsuarioId == data.UsuarioId && x.CursoId == data.CursoId && x.Status == "ativo");
+
+            if (!matriculaAtiva)
+            {
+                throw new ErrorServiceException(
+                    "Matricula nao encontrada",
+                    c => c.Conflict(new { message = "O usuario precisa estar matriculado no curso para avaliar" })
+                );
+            }
+
+            var avaliacaoExiste = await _context.Avaliacoes
+                .AnyAsync(x => x.UsuarioId == data.UsuarioId && x.CursoId == data.CursoId && x.Id != id);
+
+            if (avaliacaoExiste)
+            {
+                throw new ErrorServiceException(
+                    "Avaliacao ja existente",
+                    c => c.Conflict(new { message = "O usuario ja avaliou este curso" })
+                );
+            }
 
             _mapper.Map(data, avaliacao);
 
             _context.Avaliacoes.Update(avaliacao);
             await _context.SaveChangesAsync();
 
-            return avaliacao;
+            return await FindById(avaliacao.Id);
         }
 
         public async Task Remove(int id)
         {
-            var avaliacao = await FindById(id);
+            var avaliacao = await FindEntityById(id);
 
             _context.Avaliacoes.Remove(avaliacao);
             await _context.SaveChangesAsync();

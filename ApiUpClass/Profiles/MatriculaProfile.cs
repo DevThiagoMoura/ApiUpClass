@@ -1,4 +1,5 @@
-﻿using ApiUpClass.Dtos;
+using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Models;
 using AutoMapper;
 
@@ -13,6 +14,7 @@ namespace ApiUpClass.Profiles
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "ativo"));
 
             CreateMap<MatriculaUpdateDto, Matricula>();
+            CreateMap<Matricula, MatriculaResponseDto>();
         }
     }
 }

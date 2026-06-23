@@ -1,8 +1,10 @@
-﻿using ApiUpClass.DataContexts;
+using ApiUpClass.DataContexts;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Models;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiUpClass.Services
@@ -18,19 +20,24 @@ namespace ApiUpClass.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Modulo>> FindAll()
+        public async Task<ICollection<ModuloResponseDto>> FindAll()
         {
             return await _context.Modulos
-                .Include(m => m.curso)
-                .Include(m => m.aulas)
+                .ProjectTo<ModuloResponseDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
-        public async Task<Modulo> FindById(int id)
+        public async Task<ModuloResponseDto> FindById(int id)
+        {
+            var modulo = await FindEntityById(id);
+
+            return _mapper.Map<ModuloResponseDto>(modulo);
+        }
+
+        private async Task<Modulo> FindEntityById(int id)
         {
             var modulo = await _context.Modulos
                 .Include(m => m.curso)
-                .Include(m => m.aulas)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (modulo is null)
@@ -44,7 +51,7 @@ namespace ApiUpClass.Services
             return modulo;
         }
 
-        public async Task<Modulo> Create(ModuloDto data)
+        public async Task<ModuloResponseDto> Create(ModuloDto data)
         {
             var cursoExiste = await _context.Cursos
                 .AnyAsync(c => c.Id == data.CursoId);
@@ -73,12 +80,12 @@ namespace ApiUpClass.Services
             await _context.Modulos.AddAsync(modulo);
             await _context.SaveChangesAsync();
 
-            return modulo;
+            return await FindById(modulo.Id);
         }
 
-        public async Task<Modulo> Update(int id, ModuloUpdateDto data)
+        public async Task<ModuloResponseDto> Update(int id, ModuloUpdateDto data)
         {
-            var modulo = await FindById(id);
+            var modulo = await FindEntityById(id);
 
             var cursoExiste = await _context.Cursos
                 .AnyAsync(c => c.Id == data.CursoId);
@@ -107,12 +114,12 @@ namespace ApiUpClass.Services
             _context.Modulos.Update(modulo);
             await _context.SaveChangesAsync();
 
-            return modulo;
+            return await FindById(modulo.Id);
         }
 
         public async Task Remove(int id)
         {
-            var modulo = await FindById(id);
+            var modulo = await FindEntityById(id);
 
             _context.Modulos.Remove(modulo);
             await _context.SaveChangesAsync();

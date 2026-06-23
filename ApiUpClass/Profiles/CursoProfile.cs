@@ -1,4 +1,5 @@
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Models;
 using AutoMapper;
 
@@ -19,6 +20,12 @@ namespace ApiUpClass.Profiles
                 );
 
             CreateMap<CursoUpdateDto, Curso>();
+            CreateMap<Curso, CursoResponseDto>()
+                .ForMember(
+                    dest => dest.Tags,
+                    opt => opt.MapFrom(src => src.CursosTags!.Select(ct => ct.Tag))
+                );
+            CreateMap<Curso, CursoResumoResponseDto>();
         }
     }
 }

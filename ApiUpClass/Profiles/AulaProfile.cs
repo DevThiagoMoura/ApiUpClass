@@ -1,6 +1,8 @@
-﻿using AutoMapper;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Models;
+using AutoMapper;
+
 namespace ApiUpClass.Profiles
 {
     public class AulaProfile : Profile
@@ -9,6 +11,7 @@ namespace ApiUpClass.Profiles
         {
             CreateMap<AulaDto, Aula>();
             CreateMap<AulaUpdateDto, Aula>();
+            CreateMap<Aula, AulaResponseDto>();
         }
     }
 }

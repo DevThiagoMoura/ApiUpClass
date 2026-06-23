@@ -51,6 +51,78 @@ namespace ApiUpClass.Controllers
             }
         }
 
+        [HttpGet("ativos")]
+        public async Task<IActionResult> FindActive()
+        {
+            try
+            {
+                var cursos = await _service.FindActive();
+
+                return Ok(cursos);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("categoria/{categoriaId}")]
+        public async Task<IActionResult> FindByCategoria(int categoriaId)
+        {
+            try
+            {
+                var cursos = await _service.FindByCategoria(categoriaId);
+
+                return Ok(cursos);
+            }
+            catch (ErrorServiceException e)
+            {
+                return e.ToActionResult(this);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("tag/{tagId}")]
+        public async Task<IActionResult> FindByTag(int tagId)
+        {
+            try
+            {
+                var cursos = await _service.FindByTag(tagId);
+
+                return Ok(cursos);
+            }
+            catch (ErrorServiceException e)
+            {
+                return e.ToActionResult(this);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [HttpGet("{id}/modulos")]
+        public async Task<IActionResult> FindModulos(int id)
+        {
+            try
+            {
+                var modulos = await _service.FindModulos(id);
+
+                return Ok(modulos);
+            }
+            catch (ErrorServiceException e)
+            {
+                return e.ToActionResult(this);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
         [Authorize(Roles = "instrutor")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CursoDto novoCurso)
@@ -60,6 +132,26 @@ namespace ApiUpClass.Controllers
                 var curso = await _service.Create(novoCurso);
 
                 return Created("", curso);
+            }
+            catch (ErrorServiceException e)
+            {
+                return e.ToActionResult(this);
+            }
+            catch (Exception e)
+            {
+                return Problem(e.Message);
+            }
+        }
+
+        [Authorize(Roles = "instrutor")]
+        [HttpPost("{id}/tags")]
+        public async Task<IActionResult> AddTags(int id, [FromBody] CursoTagsDto tags)
+        {
+            try
+            {
+                var curso = await _service.AddTags(id, tags);
+
+                return Ok(curso);
             }
             catch (ErrorServiceException e)
             {

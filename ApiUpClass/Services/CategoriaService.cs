@@ -1,8 +1,10 @@
 using ApiUpClass.DataContexts;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Models;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiUpClass.Services
@@ -18,18 +20,23 @@ namespace ApiUpClass.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Categoria>> FindAll()
+        public async Task<ICollection<CategoriaResponseDto>> FindAll()
         {
             return await _context.Categorias
-                .Include(c => c.Cursos)
+                .ProjectTo<CategoriaResponseDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
-        public async Task<Categoria> FindById(int id)
+        public async Task<CategoriaResponseDto> FindById(int id)
         {
-            var categoria = await _context.Categorias
-                .Include(c => c.Cursos)
-                .FirstOrDefaultAsync(c => c.Id == id);
+            var categoria = await FindEntityById(id);
+
+            return _mapper.Map<CategoriaResponseDto>(categoria);
+        }
+
+        private async Task<Categoria> FindEntityById(int id)
+        {
+            var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id);
 
             if (categoria is null)
             {
@@ -42,31 +49,31 @@ namespace ApiUpClass.Services
             return categoria;
         }
 
-        public async Task<Categoria> Create(CategoriaDto data)
+        public async Task<CategoriaResponseDto> Create(CategoriaDto data)
         {
             var categoria = _mapper.Map<Categoria>(data);
 
             await _context.Categorias.AddAsync(categoria);
             await _context.SaveChangesAsync();
 
-            return categoria;
+            return _mapper.Map<CategoriaResponseDto>(categoria);
         }
 
-        public async Task<Categoria> Update(int id, CategoriaDto data)
+        public async Task<CategoriaResponseDto> Update(int id, CategoriaDto data)
         {
-            var categoria = await FindById(id);
+            var categoria = await FindEntityById(id);
 
             _mapper.Map(data, categoria);
 
             _context.Categorias.Update(categoria);
             await _context.SaveChangesAsync();
 
-            return categoria;
+            return _mapper.Map<CategoriaResponseDto>(categoria);
         }
 
         public async Task Remove(int id)
         {
-            var categoria = await FindById(id);
+            var categoria = await FindEntityById(id);
 
             _context.Categorias.Remove(categoria);
             await _context.SaveChangesAsync();

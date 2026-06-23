@@ -3,6 +3,7 @@ bin/
 obj/
 **/bin/
 **/obj/
+build-test/
 
 # Visual Studio local files
 .vs/

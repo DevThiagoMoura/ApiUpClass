@@ -1,8 +1,10 @@
-﻿using ApiUpClass.DataContexts;
+using ApiUpClass.DataContexts;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Models;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,12 +22,21 @@ namespace ApiUpClass.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Usuario>> FindAll()
+        public async Task<ICollection<UsuarioResponseDto>> FindAll()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Usuarios
+                .ProjectTo<UsuarioResponseDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
-        public async Task<Usuario> FindById(int id)
+        public async Task<UsuarioResponseDto> FindById(int id)
+        {
+            var usuario = await FindEntityById(id);
+
+            return _mapper.Map<UsuarioResponseDto>(usuario);
+        }
+
+        private async Task<Usuario> FindEntityById(int id)
         {
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(x => x.Id == id);
 
@@ -40,7 +51,7 @@ namespace ApiUpClass.Services
             return usuario;
         }
 
-        public async Task<Usuario> Create(UsuarioDto data)
+        public async Task<UsuarioResponseDto> Create(UsuarioDto data)
         {
             var emailExiste = await _context.Usuarios.AnyAsync(x => x.Email == data.Email);
 
@@ -58,12 +69,12 @@ namespace ApiUpClass.Services
             await _context.Usuarios.AddAsync(usuario);
             await _context.SaveChangesAsync();
 
-            return usuario;
+            return _mapper.Map<UsuarioResponseDto>(usuario);
         }
 
-        public async Task<Usuario> Update(int id, UsuarioUpdateDto data)
+        public async Task<UsuarioResponseDto> Update(int id, UsuarioUpdateDto data)
         {
-            var usuario = await FindById(id);
+            var usuario = await FindEntityById(id);
 
             var emailExiste = await _context.Usuarios.AnyAsync(x => x.Email == data.Email && x.Id != id);
 
@@ -80,12 +91,12 @@ namespace ApiUpClass.Services
             _context.Usuarios.Update(usuario);
             await _context.SaveChangesAsync();
 
-            return usuario;
+            return _mapper.Map<UsuarioResponseDto>(usuario);
         }
 
         public async Task Remove(int id)
         {
-            var usuario = await FindById(id);
+            var usuario = await FindEntityById(id);
 
             _context.Usuarios.Remove(usuario);
             await _context.SaveChangesAsync();

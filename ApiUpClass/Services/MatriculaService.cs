@@ -1,8 +1,10 @@
-﻿using ApiUpClass.DataContexts;
+using ApiUpClass.DataContexts;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Exceptions;
 using ApiUpClass.Models;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiUpClass.Services
@@ -18,15 +20,21 @@ namespace ApiUpClass.Services
             _mapper = mapper;
         }
 
-        public async Task<ICollection<Matricula>> FindAll()
+        public async Task<ICollection<MatriculaResponseDto>> FindAll()
         {
             return await _context.Matriculas
-                .Include(x => x.Usuario)
-                .Include(x => x.Curso)
+                .ProjectTo<MatriculaResponseDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 
-        public async Task<Matricula> FindById(int id)
+        public async Task<MatriculaResponseDto> FindById(int id)
+        {
+            var matricula = await FindEntityById(id);
+
+            return _mapper.Map<MatriculaResponseDto>(matricula);
+        }
+
+        private async Task<Matricula> FindEntityById(int id)
         {
             var matricula = await _context.Matriculas
                 .Include(x => x.Usuario)
@@ -44,7 +52,7 @@ namespace ApiUpClass.Services
             return matricula;
         }
 
-        public async Task<Matricula> Create(MatriculaDto data)
+        public async Task<MatriculaResponseDto> Create(MatriculaDto data)
         {
             var usuarioExiste = await _context.Usuarios.AnyAsync(x => x.Id == data.UsuarioId);
             var cursoExiste = await _context.Cursos.AnyAsync(x => x.Id == data.CursoId);
@@ -81,12 +89,12 @@ namespace ApiUpClass.Services
             await _context.Matriculas.AddAsync(matricula);
             await _context.SaveChangesAsync();
 
-            return matricula;
+            return await FindById(matricula.Id);
         }
 
-        public async Task<Matricula> Update(int id, MatriculaUpdateDto data)
+        public async Task<MatriculaResponseDto> Update(int id, MatriculaUpdateDto data)
         {
-            var matricula = await FindById(id);
+            var matricula = await FindEntityById(id);
 
             var usuarioExiste = await _context.Usuarios.AnyAsync(x => x.Id == data.UsuarioId);
             var cursoExiste = await _context.Cursos.AnyAsync(x => x.Id == data.CursoId);
@@ -107,17 +115,28 @@ namespace ApiUpClass.Services
                 );
             }
 
+            var matriculaExiste = await _context.Matriculas
+                .AnyAsync(x => x.UsuarioId == data.UsuarioId && x.CursoId == data.CursoId && x.Id != id);
+
+            if (matriculaExiste)
+            {
+                throw new ErrorServiceException(
+                    "Matricula ja existente",
+                    c => c.Conflict(new { message = "O usuario ja esta matriculado neste curso" })
+                );
+            }
+
             _mapper.Map(data, matricula);
 
             _context.Matriculas.Update(matricula);
             await _context.SaveChangesAsync();
 
-            return matricula;
+            return await FindById(matricula.Id);
         }
 
         public async Task Remove(int id)
         {
-            var matricula = await FindById(id);
+            var matricula = await FindEntityById(id);
 
             _context.Matriculas.Remove(matricula);
             await _context.SaveChangesAsync();

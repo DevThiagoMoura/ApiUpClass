@@ -1,6 +1,7 @@
-﻿using AutoMapper;
 using ApiUpClass.Dtos;
+using ApiUpClass.Dtos.Responses;
 using ApiUpClass.Models;
+using AutoMapper;
 
 namespace ApiUpClass.Profiles
 {
@@ -10,6 +11,9 @@ namespace ApiUpClass.Profiles
         {
             CreateMap<ModuloDto, Modulo>();
             CreateMap<ModuloUpdateDto, Modulo>();
+            CreateMap<Modulo, ModuloResponseDto>()
+                .ForMember(dest => dest.Curso, opt => opt.MapFrom(src => src.curso));
+            CreateMap<Modulo, ModuloResumoResponseDto>();
         }
     }
 }

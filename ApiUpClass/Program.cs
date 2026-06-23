@@ -16,6 +16,13 @@ var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
+if (builder.Environment.IsDevelopment() &&
+    !string.IsNullOrWhiteSpace(connectionString) &&
+    !connectionString.Contains("SslMode", StringComparison.OrdinalIgnoreCase))
+{
+    connectionString += ";SslMode=None";
+}
+
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 32)))
 );

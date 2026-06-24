@@ -4,8 +4,8 @@ API REST para uma plataforma de cursos online, desenvolvida em ASP.NET Core com 
 
 ## Desenvolvedores
 
-- Thiago Moura
-- Daniélly Bernardino Batista
+- Thiago Moura de Carvalho
+- DaniÃ©lly Bernardino Batista
 
 ## Objetivo
 
